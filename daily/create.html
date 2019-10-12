@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 现实研究一下object.create的用法: Object.create()方法创建一个新对象，使用现有的对象来提供新创建的对象的__proto__。主要用于实现继承。
+        // 1）普通的对象调用
+        const person = {
+            isHuman: false,
+            printIntroduction: function () {
+                console.log(`My name is ${this.name}. Am I human? ${this.isHuman}`);
+            }
+        };
+
+        const me = Object.create(person);
+
+        me.name = "Matthew"; // "name" is a property set on "me", but not on "person"
+        me.isHuman = true; // inherited properties can be overwritten
+
+        me.printIntroduction();
+        // expected output: "My name is Matthew. Am I human? true"
+
+        // 2）构造函数实现继承(单继承) 
+        // Shape - 父类(superclass)
+        function Shape() {
+            this.x = 0;
+            this.y = 0;
+        }
+        // 父类的方法
+        Shape.prototype.move = function (x, y) {
+            this.x += x;
+            this.y += y;
+            console.info('Shape moved.');
+        };
+
+        // (2)Object.create来实现
+        function Rectangle() {
+            Shape.call(this); // call super constructor.
+        }
+        var aa = Object.create(Shape.prototype);
+        // 子类续承父类
+        Rectangle.prototype = Object.create(Shape
+            .prototype); // 如果未定义任何的prototype属性，则构造函数默认的prototype会有一个constructor构造函数，以及_proto_对象，表示上层的继承对象
+        Rectangle.prototype.constructor = Rectangle;
+        var rect = new Rectangle();
+        console.log('Is rect an instance of Rectangle?', rect instanceof Rectangle); // true
+        console.log('Is rect an instance of Shape?', rect instanceof Shape); // true
+        rect.move(1, 1); // Outputs, 'Shape moved.'
+
+        // (2)prototype来实现继承
+        function Cricle() {};
+        var shape = new Shape();
+        Cricle.prototype = shape;
+        var circle = new Cricle();
+        debugger;
+        console.log('Is rect an instance of Cricle?', circle instanceof Cricle); // true
+        console.log('Is rect an instance of Shape?', circle instanceof Shape); // true
+        circle.move(1, 1); // Outputs, 'Shape moved.'
+
+        // 3） 多继承，使用混入的方式实现多继承
+        // function MyClass() {
+        //     SuperClass.call(this);
+        //     OtherSuperClass.call(this);
+        // }
+
+        // // 继承一个类
+        // MyClass.prototype = Object.create(SuperClass.prototype);
+        // // 混合其它
+        // Object.assign(MyClass.prototype, OtherSuperClass.prototype);
+        // // 重新指定constructor
+        // MyClass.prototype.constructor = MyClass;
+
+        // MyClass.prototype.myMethod = function () {
+        //     // do a thing
+        // };
+
+
+        // 总结：create函数其实就干了下面的一件事情： 
+        Object.create = function (proto, propertiesObject) {
+            function F() {}
+            F.prototype = proto;
+            return new F();
+        }
+
+        function Constructor() {}
+        o = new Constructor();
+        // 上面的一句就相当于:
+        o = Object.create(Constructor.prototype); // 只是继承了prototye属性，并不会执行构造函数内的初始化操作
+        // 当然,如果在Constructor函数中有一些初始化代码,Object.create不能执行那些代码
+    </script>
+</body>
+
+</html>
